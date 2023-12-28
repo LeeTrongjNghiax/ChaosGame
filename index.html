@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaos Game</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            color: #aaaaaa;
+            background-color: #121212;
+            font-size: 16px;
+            font-family: monospace;
+        }
+
+        input {
+            padding: 0.5rem;
+        }
+
+        body {
+            display: grid;
+            grid-template-columns: 1fr 20fr;
+            height: 100vh;
+        }
+
+        main {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #canvas-container {
+            padding: 1rem;
+        }
+
+        #cv {
+            width: 900px;
+            height: 900px;
+            border: 1px solid white;
+        }
+
+        .vertex-container {
+            padding: 0.5rem;
+            border: 1px solid white;
+        }
+
+        .input-container input, #numerator, #denominator { 
+            width: 35%;
+        }
+
+        #vertexes_radius {
+            width: 25%;
+        }
+
+        #number_of_points {
+            width: 100%;
+        }
+
+        input[type=color] {
+            width: 15%;
+            border: 1px solid green;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <button id="add_vertexes">Add vertexes</button>
+
+        <button id="draw">Draw!</button>
+
+        <div class="input-container">
+            <label for="canvas_width">Canvas width:</label>
+            <input type="number" id="canvas_width" min="1" max="1000" value="900">
+        </div>
+
+        <div class="input-container">
+            <label for="canvas_height">Canvas height:</label>
+            <input type="number" id="canvas_height" min="1" max="1000" value="900">
+        </div>
+
+        <div class="input-container">
+            <label for="vertexes_radius">Vertexes radius:</label>
+            <input type="number" id="vertexes_radius" min="1" max="20" value="5">
+        </div>
+
+        <div class="input-container">
+            <label for="vertexes_color">Vertexes color:</label>
+            <input type="color" id="vertexes_color" value="#00ff00">
+        </div>
+        
+        <label for="number_of_vertexes">Number of vertexes:</label>
+        <input type="number" id="number_of_vertexes" value="3">
+
+        <div id="vertexes">
+            <!-- <div class="vertex-container">
+                <div class="input-container">
+                    <label for="v1_x">Vertex #1 x: </label>
+                    <input type="number" id="v1_x" min="0" value="50" title="v1_x">    
+                </div>
+            
+                <div class="input-container">
+                    <label for="v1_y">Vertex #1 y: </label>
+                    <input type="number" id="v1_y" min="0" value="50" title="v1_y" size="1">
+                </div>
+            </div> -->
+        </div>
+
+        <div class="input-container">
+            <label for="numerator">Numerator of Ratio between current point and random vertex:</label>
+            <input type="number" id="numerator" min="0" value="1">    
+        </div>
+
+        <div class="input-container">
+            <label for="denomenator">Denomenator of Ratio between current point and random vertex:</label>
+            <input type="number" id="denomenator" min="1" value="2">    
+        </div>
+        
+        <label for="delay_time">Delay time between points (s):</label>
+        <input type="number" id="delay_time" min="1" max="10" value="2">
+
+        <div class="input-container">
+            <label for="point_radius">Point radius:</label>
+            <input type="number" id="point_radius" min="1" max="20" value="1">
+        </div>
+
+        <div class="input-container">
+            <label for="start_point_color">Start point color:</label>
+            <input type="color" id="start_point_color" value="#ffffff">
+        </div>
+
+        <div class="input-container">
+            <label for="number_of_points">Number of points:</label>
+            <input type="number" id="number_of_points" min="0" max="50000" value="1000">
+        </div>
+        
+        <label for="start_point_position_x">Start point position x (%):</label>
+        <input type="number" id="start_point_position_x" min="0" max="100" value="50" step="10">
+        
+        <label for="start_point_position_y">Start point position y (%):</label>
+        <input type="number" id="start_point_position_y" min="0" max="100" value="50" step="10">
+    </main>
+
+    <div id="canvas-container">
+        <canvas id="cv"></canvas>
+    </div>
+
+    <script>
+        let vertexes_radius;
+        let vertexes_color;
+        let number_of_vertexes;
+        let point_radius;
+        let start_point_color;
+        let number_of_points;
+        let start_point_position_x;
+        let start_point_position_y;
+        let numerator;
+        let denomenator;
+        let delay_time;
+        let draw;
+        let add_vertexes;
+        let vertexes;
+        let cv;
+        let ctx;
+        let canvas_width;
+        let canvas_height;
+
+        init = () => {
+            canvas_width           = parseInt( document.querySelector("#canvas_width").value );
+            canvas_height          = parseInt( document.querySelector("#canvas_height").value );
+            vertexes_radius        = parseFloat( document.querySelector("#vertexes_radius").value );
+            vertexes_color         = document.querySelector("#vertexes_color").value;
+            number_of_vertexes     = parseInt( document.querySelector("#number_of_vertexes").value );
+            point_radius           = parseFloat( document.querySelector("#point_radius").value );
+            start_point_color      = document.querySelector("#start_point_color").value;
+            number_of_points       = parseInt( document.querySelector("#number_of_points").value );
+            start_point_position_x = parseFloat( document.querySelector("#start_point_position_x").value );
+            start_point_position_y = parseFloat( document.querySelector("#start_point_position_y").value );
+            numerator              = parseFloat( document.querySelector("#numerator").value );
+            denomenator            = parseFloat( document.querySelector("#denomenator").value );
+            delay_time             = parseFloat( document.querySelector("#delay_time").value );
+            draw                   = document.querySelector("#draw").value;
+            add_vertexes           = document.querySelector("#add_vertexes").value;
+            
+            vertexes = document.querySelector("#vertexes");
+            vertexes.replaceChildren();
+
+            cv = document.querySelector("#cv");
+            cv.width = canvas_width;
+            cv.height = canvas_height;
+            ctx = cv.getContext("2d");
+
+            width = cv.width;
+            height = cv.height;
+        }
+
+        get_values = () => {
+            vertexes_radius        = parseFloat( document.querySelector("#vertexes_radius").value );
+            vertexes_color         = document.querySelector("#vertexes_color").value;
+            point_radius           = parseFloat( document.querySelector("#point_radius").value );
+            start_point_color      = document.querySelector("#start_point_color").value;
+            number_of_points       = parseInt( document.querySelector("#number_of_points").value );
+            start_point_position_x = parseFloat( document.querySelector("#start_point_position_x").value );
+            start_point_position_y = parseFloat( document.querySelector("#start_point_position_y").value );
+            numerator              = parseFloat( document.querySelector("#numerator").value );
+            denomenator            = parseFloat( document.querySelector("#denomenator").value );
+            delay_time             = parseFloat( document.querySelector("#delay_time").value );
+        }
+
+        add_new_vertexes = () => {
+            for (let i = 0; i < number_of_vertexes; i++) {
+                let pos = i + 1;
+
+                let x_label = document.createElement("label");
+                x_label.setAttribute("for", `v${ pos }_x`);
+                x_label.innerHTML = `V #${ pos } x (%): `;
+
+                let x_input = document.createElement("input");
+                x_input.setAttribute("type", "number");
+                x_input.setAttribute("id", `v${ pos }_x`);
+                x_input.setAttribute("min", 0);
+                x_input.setAttribute("max", 100);
+                x_input.setAttribute("value", 50);
+                x_input.setAttribute("step", 10);
+
+                let x_container = document.createElement("div");
+                x_container.setAttribute("class", "input-container")
+                x_container.appendChild( x_label );
+                x_container.appendChild( x_input );
+
+                let y_label = document.createElement("label");
+                y_label.setAttribute("for", `v${ pos }_y`);
+                y_label.innerHTML = `V #${ pos } y (%): `;
+
+                let y_input = document.createElement("input");
+                y_input.setAttribute("type", "number");
+                y_input.setAttribute("id", `v${ pos }_y`);
+                y_input.setAttribute("min", 0);
+                y_input.setAttribute("max", 100);
+                y_input.setAttribute("value", 50);
+                y_input.setAttribute("step", 10);
+
+                let y_container = document.createElement("div");
+                y_container.setAttribute("class", "input-container")
+                y_container.appendChild( y_label );
+                y_container.appendChild( y_input );
+
+                let vertex_container = document.createElement("div");
+                vertex_container.setAttribute("class", "vertex-container");
+                vertex_container.appendChild( x_container );
+                vertex_container.appendChild( y_container );
+
+                vertexes.appendChild( vertex_container );
+            }
+        }
+
+        draw_all_vertexes = () => {
+            for (let i = 0; i < number_of_vertexes; i++) {
+                let pos = i + 1;
+                let vertex_x = parseFloat( document.querySelector(`#v${ pos }_x`).value );
+                let vertex_y = parseFloat( document.querySelector(`#v${ pos }_y`).value );
+
+                ctx.beginPath();
+                ctx.arc( ( vertex_x * width ) / 100, ( vertex_y * height ) / 100, vertexes_radius, 0, 2 * Math.PI);
+                ctx.fillStyle = vertexes_color;
+                ctx.fill();
+            }
+        }
+
+        draw_starting_point = () => {
+            ctx.beginPath();
+            ctx.arc( ( start_point_position_x * width ) / 100, ( start_point_position_y * height ) / 100, point_radius, 0, 2 * Math.PI);
+            ctx.fillStyle = start_point_color;
+            ctx.fill();
+        }
+
+        random_int = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+        
+        draw_all_points = () => {
+            let current_point_x = start_point_position_x;
+            let current_point_y = start_point_position_y;
+
+            for (let i = 0; i < number_of_points; i++) {
+                let index = random_int( 0, number_of_vertexes - 1 ) + 1;
+                let ratio = ( numerator / ( numerator + denomenator ) );
+
+                // get given point that lie on a line that connect 2 points with a given ratio;
+                current_point_x = ( denomenator * current_point_x + numerator * parseFloat( document.querySelector(`#v${ index }_x`).value ) ) / ( numerator + denomenator );
+                current_point_y = ( denomenator * current_point_y + numerator * parseFloat( document.querySelector(`#v${ index }_y`).value ) ) / ( numerator + denomenator );
+                
+                ctx.beginPath();
+                ctx.arc( ( current_point_x * width ) / 100, ( current_point_y * height ) / 100, point_radius, 0, 2 * Math.PI);
+                ctx.fillStyle = start_point_color;
+                ctx.fill();
+            }
+        }
+
+        document.querySelector("#add_vertexes").addEventListener("click", e => {
+            init();
+            add_new_vertexes();
+        });
+
+        document.querySelector("#draw").addEventListener("click", e => {
+            ctx.clearRect(0, 0, cv.width, cv.height);
+            get_values();
+            draw_all_vertexes();
+            draw_starting_point();
+            draw_all_points();
+        });
+    </script>
+</body>
+</html>
