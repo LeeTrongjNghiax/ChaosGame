@@ -64,6 +64,22 @@
             width: 15%;
             border: 1px solid green;
         }
+
+        @media (orientation: portrait) {
+            * {
+                font-size: 30px;
+            }
+            body {
+                width: 100vw;
+                grid-template-columns: 1fr;
+            }
+            canvas {
+                order: 1;
+            }
+            main {
+                order: 2;
+            }
+        }
     </style>
 </head>
 <body>
@@ -74,12 +90,12 @@
 
         <div class="input-container">
             <label for="canvas_width">Canvas width:</label>
-            <input type="number" id="canvas_width" min="1" max="1000" value="900">
+            <input type="number" id="canvas_width" min="1" max="100000" value="900">
         </div>
 
         <div class="input-container">
             <label for="canvas_height">Canvas height:</label>
-            <input type="number" id="canvas_height" min="1" max="1000" value="900">
+            <input type="number" id="canvas_height" min="1" max="100000" value="900">
         </div>
 
         <div class="input-container">
@@ -111,16 +127,16 @@
 
         <div class="input-container">
             <label for="numerator">Numerator of Ratio between current point and random vertex:</label>
-            <input type="number" id="numerator" min="0" value="1">    
+            <input type="number" id="numerator" min="0" value="1">
         </div>
 
         <div class="input-container">
             <label for="denomenator">Denomenator of Ratio between current point and random vertex:</label>
-            <input type="number" id="denomenator" min="1" value="2">    
+            <input type="number" id="denomenator" min="1" value="1">
         </div>
         
         <label for="delay_time">Delay time between points (s):</label>
-        <input type="number" id="delay_time" min="1" max="10" value="2">
+        <input type="number" id="delay_time" min="0" max="10" value="0">
 
         <div class="input-container">
             <label for="point_radius">Point radius:</label>
@@ -128,13 +144,13 @@
         </div>
 
         <div class="input-container">
-            <label for="start_point_color">Start point color:</label>
+            <label for="start_point_color">Point color:</label>
             <input type="color" id="start_point_color" value="#ffffff">
         </div>
 
         <div class="input-container">
             <label for="number_of_points">Number of points:</label>
-            <input type="number" id="number_of_points" min="0" max="50000" value="1000">
+            <input type="number" id="number_of_points" min="0" max="1000000" value="1000">
         </div>
         
         <label for="start_point_position_x">Start point position x (%):</label>
@@ -189,15 +205,20 @@
             vertexes.replaceChildren();
 
             cv = document.querySelector("#cv");
+            ctx = cv.getContext("2d");
+
+            cv.style.width = canvas_width + "px";
+            cv.style.height = canvas_height + "px";
             cv.width = canvas_width;
             cv.height = canvas_height;
-            ctx = cv.getContext("2d");
 
             width = cv.width;
             height = cv.height;
         }
 
         get_values = () => {
+            canvas_width           = parseInt( document.querySelector("#canvas_width").value );
+            canvas_height          = parseInt( document.querySelector("#canvas_height").value );
             vertexes_radius        = parseFloat( document.querySelector("#vertexes_radius").value );
             vertexes_color         = document.querySelector("#vertexes_color").value;
             point_radius           = parseFloat( document.querySelector("#point_radius").value );
@@ -208,6 +229,14 @@
             numerator              = parseFloat( document.querySelector("#numerator").value );
             denomenator            = parseFloat( document.querySelector("#denomenator").value );
             delay_time             = parseFloat( document.querySelector("#delay_time").value );
+
+            cv.style.width = canvas_width + "px";
+            cv.style.height = canvas_height + "px";
+            cv.width = canvas_width;
+            cv.height = canvas_height;
+
+            width = cv.width;
+            height = cv.height;
         }
 
         add_new_vertexes = () => {
@@ -280,22 +309,48 @@
         random_int = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
         
         draw_all_points = () => {
+            ctx.fillStyle = start_point_color;
+
             let current_point_x = start_point_position_x;
             let current_point_y = start_point_position_y;
+            let loop_count = number_of_points;
+            var i = 1;
 
-            for (let i = 0; i < number_of_points; i++) {
-                let index = random_int( 0, number_of_vertexes - 1 ) + 1;
-                let ratio = ( numerator / ( numerator + denomenator ) );
+            (
+                function draw_point_with_time_out(i) {
+                    if ( delay_time > 0 ) {
+                        setTimeout( () => {
+                            let index = random_int( 0, number_of_vertexes - 1 ) + 1;
+                            let ratio = ( numerator / ( numerator + denomenator ) );
 
-                // get given point that lie on a line that connect 2 points with a given ratio;
-                current_point_x = ( denomenator * current_point_x + numerator * parseFloat( document.querySelector(`#v${ index }_x`).value ) ) / ( numerator + denomenator );
-                current_point_y = ( denomenator * current_point_y + numerator * parseFloat( document.querySelector(`#v${ index }_y`).value ) ) / ( numerator + denomenator );
-                
-                ctx.beginPath();
-                ctx.arc( ( current_point_x * width ) / 100, ( current_point_y * height ) / 100, point_radius, 0, 2 * Math.PI);
-                ctx.fillStyle = start_point_color;
-                ctx.fill();
-            }
+                            // get given point that lie on a line that connect 2 points with a given ratio;
+                            current_point_x = ( denomenator * current_point_x + numerator * parseFloat( document.querySelector(`#v${ index }_x`).value ) ) / ( numerator + denomenator );
+                            current_point_y = ( denomenator * current_point_y + numerator * parseFloat( document.querySelector(`#v${ index }_y`).value ) ) / ( numerator + denomenator );
+                    
+                            ctx.beginPath();
+                            ctx.arc( ( current_point_x * width ) / 100, ( current_point_y * height ) / 100, point_radius, 0, 2 * Math.PI);
+                            ctx.fill();
+
+                            if (--i)
+                                draw_point_with_time_out(i);
+                        }, delay_time * 1000)
+                    } 
+                    else {
+                        for (let j = 0; j < number_of_points; j++) {
+                            let index = random_int( 0, number_of_vertexes - 1 ) + 1;
+                            let ratio = ( numerator / ( numerator + denomenator ) );
+
+                            // get given point that lie on a line that connect 2 points with a given ratio;
+                            current_point_x = ( denomenator * current_point_x + numerator * parseFloat( document.querySelector(`#v${ index }_x`).value ) ) / ( numerator + denomenator );
+                            current_point_y = ( denomenator * current_point_y + numerator * parseFloat( document.querySelector(`#v${ index }_y`).value ) ) / ( numerator + denomenator );
+                    
+                            ctx.beginPath();
+                            ctx.arc( ( current_point_x * width ) / 100, ( current_point_y * height ) / 100, point_radius, 0, 2 * Math.PI);
+                            ctx.fill();
+                        }
+                    }
+                }
+            ) (loop_count);
         }
 
         document.querySelector("#add_vertexes").addEventListener("click", e => {
