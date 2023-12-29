@@ -30,6 +30,7 @@
         button {
             padding: 1rem;
             font-size: 1.5rem;
+            width: 90%;
         }
 
         h1 {
@@ -47,6 +48,10 @@
             justify-content: center;
             gap: 1rem;
             transition: left 0.5s;
+        }
+
+        main button {
+            width: 100%;
         }
 
         #show-control:active + main {
@@ -127,10 +132,6 @@
             display: flex;
         }
 
-        button {
-            width: 90%;
-        }
-
         @media (orientation: portrait) {
             * {
                 font-size: 20px;
@@ -138,6 +139,12 @@
             body {
                 width: 100vw;
                 grid-template-columns: 1fr;
+            }
+            #show-control {
+                display: none;
+            }
+            main {
+                position: initial;
             }
             #canvas-container {
                 padding: 0;
@@ -150,6 +157,7 @@
             }
             .input-container {
                 width: 100%;
+                padding: 0.5rem;
                 grid-template-columns: 1fr;
             }
             #vertexes {
@@ -168,8 +176,6 @@
     <button id="show-control">Show control</button>
 
     <main>
-        <button id="add_vertexes">Add vertexes</button>
-
         <button id="draw">Draw!</button>
 
         <div class="dropdown">
@@ -206,6 +212,8 @@
                     <label for="number_of_vertexes">Number of vertexes:</label>
                     <input type="number" id="number_of_vertexes" value="3">
                 </div>
+
+                <button id="add_vertexes">Add vertexes</button>
 
                 <div class="input-container" id="vertex-input-container">
                     <label for="vertexes">Vertexes:</label>
@@ -257,7 +265,7 @@
 
                 <div class="input-container">
                     <label for="number_of_points">Number of points:</label>
-                    <input type="number" id="number_of_points" min="0" max="1000000" value="1000">
+                    <input type="number" id="number_of_points" min="0" max="1000000000" value="100000">
                 </div>
                 
                 <div class="input-container">
