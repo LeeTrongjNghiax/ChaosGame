@@ -21,16 +21,40 @@
         }
 
         body {
-            display: grid;
-            grid-template-columns: 1fr 20fr;
-            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 1rem;
+            font-size: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
         }
 
         main {
+            position: fixed;
+            width: 100vw;
+            top: 0;
+            left: -100%;
             padding: 1rem;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             gap: 1rem;
+            transition: left 0.5s;
+        }
+
+        #show-control:active + main {
+            left: 0;
+        }
+
+        main:hover {
+            left: 0;
         }
 
         #canvas-container {
@@ -43,121 +67,210 @@
             border: 1px solid white;
         }
 
+        #vertexes {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
         .vertex-container {
+            min-width: 250px;
+            padding: 0.5rem;
             padding: 0.5rem;
             border: 1px solid white;
         }
 
-        .input-container input, #numerator, #denominator { 
-            width: 35%;
+        .dropdown {
+            position: relative;
         }
 
-        #vertexes_radius {
-            width: 25%;
+        .dropdown-content {
+            display: none;
+            flex-direction: column;
+            align-items: flex-end;
         }
 
-        #number_of_points {
-            width: 100%;
+        .dropdown-trigger {
+            font-weight: bolder;
+            font-size: 1.5rem;
+        }
+
+        .dropdown-trigger:hover {
+            color: green;
+        }
+
+        .input-container {
+            width: 90%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+        }
+
+        .input-container input {
+            margin: 0.5rem; 
+            width: 90%;
+        }
+
+        #vertex-input-container {
+            grid-template-columns: 1fr;
+        }
+
+        #vertex-input-container label {
+            margin: 1rem 0;
         }
 
         input[type=color] {
-            width: 15%;
             border: 1px solid green;
+        }
+
+        .show {
+            display: flex;
+        }
+
+        button {
+            width: 90%;
         }
 
         @media (orientation: portrait) {
             * {
-                font-size: 30px;
+                font-size: 20px;
             }
             body {
                 width: 100vw;
                 grid-template-columns: 1fr;
             }
-            canvas {
-                order: 1;
+            #canvas-container {
+                padding: 0;
+                width: 350px;
+                height: 350px;
             }
-            main {
-                order: 2;
+            #cv {
+                width: 350px;
+                height: 350px;
+            }
+            .input-container {
+                width: 100%;
+                grid-template-columns: 1fr;
+            }
+            #vertexes {
+                display: initial;
+            }
+            .vertex-container > .input-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
 </head>
 <body>
+    <h1>Chaos Game</h1>
+
+    <button id="show-control">Show control</button>
+
     <main>
         <button id="add_vertexes">Add vertexes</button>
 
         <button id="draw">Draw!</button>
 
-        <div class="input-container">
-            <label for="canvas_width">Canvas width:</label>
-            <input type="number" id="canvas_width" min="1" max="100000" value="900">
-        </div>
+        <div class="dropdown">
+            <p class="dropdown-trigger" onclick="show_drop_down(this)"><span>▽</span> Canvas</p>
 
-        <div class="input-container">
-            <label for="canvas_height">Canvas height:</label>
-            <input type="number" id="canvas_height" min="1" max="100000" value="900">
-        </div>
-
-        <div class="input-container">
-            <label for="vertexes_radius">Vertexes radius:</label>
-            <input type="number" id="vertexes_radius" min="1" max="20" value="5">
-        </div>
-
-        <div class="input-container">
-            <label for="vertexes_color">Vertexes color:</label>
-            <input type="color" id="vertexes_color" value="#00ff00">
-        </div>
-        
-        <label for="number_of_vertexes">Number of vertexes:</label>
-        <input type="number" id="number_of_vertexes" value="3">
-
-        <div id="vertexes">
-            <!-- <div class="vertex-container">
+            <div class="dropdown-content">
                 <div class="input-container">
-                    <label for="v1_x">Vertex #1 x: </label>
-                    <input type="number" id="v1_x" min="0" value="50" title="v1_x">    
+                    <label for="canvas_width">Canvas width:</label>
+                    <input type="number" id="canvas_width" min="1" max="100000" value="900">
                 </div>
-            
+
                 <div class="input-container">
-                    <label for="v1_y">Vertex #1 y: </label>
-                    <input type="number" id="v1_y" min="0" value="50" title="v1_y" size="1">
+                    <label for="canvas_height">Canvas height:</label>
+                    <input type="number" id="canvas_height" min="1" max="100000" value="900">
                 </div>
-            </div> -->
+            </div>
         </div>
 
-        <div class="input-container">
-            <label for="numerator">Numerator of Ratio between current point and random vertex:</label>
-            <input type="number" id="numerator" min="0" value="1">
+        <div class="dropdown">
+            <p class="dropdown-trigger" onclick="show_drop_down(this)"><span>▽</span> Vertex</p>
+
+            <div class="dropdown-content">
+                <div class="input-container">
+                    <label for="vertexes_color">Vertexes color:</label>
+                    <input type="color" id="vertexes_color" value="#00ff00">
+                </div>
+
+                <div class="input-container">
+                    <label for="vertexes_radius">Vertexes radius:</label>
+                    <input type="number" id="vertexes_radius" min="1" max="20" value="5">
+                </div>
+                
+                <div class="input-container">
+                    <label for="number_of_vertexes">Number of vertexes:</label>
+                    <input type="number" id="number_of_vertexes" value="3">
+                </div>
+
+                <div class="input-container" id="vertex-input-container">
+                    <label for="vertexes">Vertexes:</label>
+                    <div id="vertexes"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="input-container">
-            <label for="denomenator">Denomenator of Ratio between current point and random vertex:</label>
-            <input type="number" id="denomenator" min="1" value="1">
-        </div>
-        
-        <label for="delay_time">Delay time between points (s):</label>
-        <input type="number" id="delay_time" min="0" max="10" value="0">
+        <div class="dropdown">
+            <p class="dropdown-trigger" onclick="show_drop_down(this)"><span>▽</span> Ratio</p>
 
-        <div class="input-container">
-            <label for="point_radius">Point radius:</label>
-            <input type="number" id="point_radius" min="1" max="20" value="1">
-        </div>
+            <div class="dropdown-content">
+                <div class="input-container">
+                    <label for="numerator">Numerator of Ratio between current point and random vertex:</label>
+                    <input type="number" id="numerator" min="0" value="1">
+                </div>
 
-        <div class="input-container">
-            <label for="start_point_color">Point color:</label>
-            <input type="color" id="start_point_color" value="#ffffff">
+                <div class="input-container">
+                    <label for="denomenator">Denomenator of Ratio between current point and random vertex:</label>
+                    <input type="number" id="denomenator" min="1" value="1">
+                </div>
+            </div>
         </div>
 
-        <div class="input-container">
-            <label for="number_of_points">Number of points:</label>
-            <input type="number" id="number_of_points" min="0" max="1000000" value="1000">
+        <div class="dropdown">
+            <p class="dropdown-trigger" onclick="show_drop_down(this)"><span>▽</span> Time</p>
+
+            <div class="dropdown-content">
+                <div class="input-container">
+                    <label for="delay_time">Delay time between points (s):</label>
+                    <input type="number" id="delay_time" min="0" max="10" value="0">
+                </div>
+            </div>
         </div>
-        
-        <label for="start_point_position_x">Start point position x (%):</label>
-        <input type="number" id="start_point_position_x" min="0" max="100" value="50" step="10">
-        
-        <label for="start_point_position_y">Start point position y (%):</label>
-        <input type="number" id="start_point_position_y" min="0" max="100" value="50" step="10">
+
+        <div class="dropdown">
+            <p class="dropdown-trigger" onclick="show_drop_down(this)"><span>▽</span> Point</p>
+
+            <div class="dropdown-content">
+                <div class="input-container">
+                    <label for="start_point_color">Point color:</label>
+                    <input type="color" id="start_point_color" value="#ffffff">
+                </div>
+
+                <div class="input-container">
+                    <label for="point_radius">Point radius:</label>
+                    <input type="number" id="point_radius" min="1" max="20" value="1">
+                </div>
+
+                <div class="input-container">
+                    <label for="number_of_points">Number of points:</label>
+                    <input type="number" id="number_of_points" min="0" max="1000000" value="1000">
+                </div>
+                
+                <div class="input-container">
+                    <label for="start_point_position_x">Start point position x (%):</label>
+                    <input type="number" id="start_point_position_x" min="0" max="100" value="50" step="10">
+                </div>
+                
+                <div class="input-container">
+                    <label for="start_point_position_y">Start point position y (%):</label>
+                    <input type="number" id="start_point_position_y" min="0" max="100" value="50" step="10">
+                </div>
+            </div>
+        </div>
     </main>
 
     <div id="canvas-container">
@@ -165,6 +278,15 @@
     </div>
 
     <script>
+        show_drop_down = e => {
+            e.nextElementSibling.classList.toggle("show");
+
+            if ( e.nextElementSibling.classList.contains("show") )
+                e.childNodes[0].innerHTML = "△"
+            else
+                e.childNodes[0].innerHTML = "▽"
+        }
+
         let vertexes_radius;
         let vertexes_color;
         let number_of_vertexes;
